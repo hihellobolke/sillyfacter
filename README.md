@@ -1,4 +1,4 @@
-## Sillyfacter *WORK-IN-PROGRESS*
+## Sillyfacter
 
 Sillyfacter prints JSON facts related to the **state** of the system. The state here mean overview of the process running, their connections and open files. Agenda:
   - Portable *.nix
