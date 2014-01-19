@@ -7,16 +7,17 @@ Sillyfacter prints JSON facts related to the **state** of the system. The state 
 
 ### Requirements
 
-Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Python Dependencies include:
+Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Python package dependencies are:
   - netaddr
   - netifaces
   - psutil
+But these would be taken care by **pip** hah!
 
 ## Usage
-Just git clone and run the sillyfactor.py script, it should just work
+Just execute **sillyfacter** and it should output result back in JSON
 
 ```
-$ python sillyfacter.py |head -20
+$ sillyfacter |head -20
 {'boottime': 1389928960.0,
  'cpu': 8,
  'cpu_used': 5.5,
@@ -42,8 +43,8 @@ $ python sillyfacter.py |head -20
 And yes there some **--help** too.
 
 ```
-$python sillyfacter.py -h 
-usage: sillyfacter.py [-h] [--modules MODULES] [--out OUT] [--log LOG]
+$ sillyfacter -h 
+usage: sillyfacter [-h] [--modules MODULES] [--out OUT] [--log LOG]
                       [--verbose] [--scan {auto,new,last}] [--raw] [--version]
 
 Collector agent for dependency mapper service. Gathers process, open file,
@@ -70,12 +71,15 @@ optional arguments:
 Why no facter for pure Python that outputs in JSON?
 
 ## Installation
+Using pip 
+```pip install sillyfacter```
 
-To.Be.Do
+From source:
+**ToBeDone**
 
 ## Contributors
 
-Twitter @HiHelloBolke
+Email g@ut.am
 
 ## License
 
