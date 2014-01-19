@@ -1,10 +1,8 @@
 from setuptools import setup, find_packages
 import sys, os
-
-version = '0.2'
-
-setup(name='sillyfacter',
-      version=version,
+name = 'sillyfacter'
+setup(name=name,
+      version=open("bin/{}".format(name)).read().split('COLLECTOR_VERSION')[1].split('\'')[1],
       description="""\
 Sillyfacter prints JSON facts related to the state of the system. The state here means process running on the host, their open connections and files. Also users logged in, mount points on the host etcetra. These information is useful in mapping out dependencies.""",
       long_description=open('README.txt').read(),
