@@ -76,7 +76,8 @@ def _execute(cmd, stdout=None, stderr=None):
                                 stderr=stderr)
         retval = proc.wait()
     except:
-        raise
+        pass
+        #raise
     return retval
 
 
