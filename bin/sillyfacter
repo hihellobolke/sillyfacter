@@ -34,7 +34,7 @@ import re
 
 import sillyfacter.common
 
-COLLECTOR_VERSION = '0.3'
+COLLECTOR_VERSION = '0.3.0.1'
 DEBUG = False
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))

@@ -7,7 +7,6 @@ setup.py
 bin/sillyfacter
 sillyfacter/__init__.py
 sillyfacter/common.py
-sillyfacter/eman.py
 sillyfacter/filesystem.py
 sillyfacter/network.py
 sillyfacter/os.py
