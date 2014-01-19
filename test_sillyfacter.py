@@ -34,7 +34,6 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 import sillyfacter.common
 
-COLLECTOR_VERSION = '1.2.0'
 DEBUG = False
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
@@ -77,7 +76,7 @@ if __name__ == '__main__':
                              'Use raw output, default is false',
                         action='store_true')
     parser.add_argument('--version', action='version',
-                        version=COLLECTOR_VERSION)
+                        version="0.0")
 
     args = parser.parse_args()
     #

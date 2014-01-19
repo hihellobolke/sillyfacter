@@ -19,7 +19,6 @@
 # -------------------------------------------------------------------- #
 
 from __future__ import print_function
-import sys
 import os
 import platform
 import time
@@ -29,12 +28,9 @@ import argparse
 import pprint
 import re
 
-#sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-
-
 import sillyfacter.common
 
-COLLECTOR_VERSION = '0.3.0.1'
+COLLECTOR_VERSION = '0.3.0.2'
 DEBUG = False
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))

@@ -41,10 +41,12 @@ def fetch():
     if ostype == "Linux":
         host_props["kernel_release"] = platform.uname()[2]
         host_props["kernel_version"] = platform.uname()[2].split('-')[0]
-        host_props_extra = fetch_linux()
+        try:
+            host_props_extra = fetch_linux()
+        except Exception as _:
+            l.exception("unable to fetch linux specific info '{}'".format(_))
+            host_props_extra = {}
         host_props = dict(host_props.items() + host_props_extra.items())
-    #host_props = dict(
-    #    list(host_props.items()) + list(fetch_host_eman().items()))
     for i in host_props:
         l.debug("{:<15}: {}".format(i, host_props[i]))
     return host_props
@@ -69,7 +71,7 @@ def _open_read_this(filepath):
 
 def run_parse_lsb():
     lsb_finder = _run_this(["/usr/bin/which", "lsb_release"])
-    retval = None
+    retval = {}
     if lsb_finder is not None:
         lsbcmd = _run_this([lsb_finder[0].strip(), "-a"])
         if lsbcmd is not None:
@@ -107,7 +109,7 @@ def fetch_linux():
         operatingsystem = 'Mandrake'
         operatingsystemrelease = _open_read_this('/etc/mandrake-release')
     elif os.path.isfile('/etc/redhat-release'):
-        operatingsystemrelease = _open_read_this('/etc/mandrake-release')
+        operatingsystemrelease = _open_read_this('/etc/redhat-release')
         if re.compile('centos', re.IGNORECASE).search(operatingsystemrelease):
             operatingsystem = 'CentOS'
         else:
@@ -124,3 +126,4 @@ def fetch_linux():
         operatingsystemrelease = "Unknown"
     fetch["operatingsystem"] = operatingsystem
     fetch["operatingsystemreleasestring"] = operatingsystemrelease
+    return fetch
