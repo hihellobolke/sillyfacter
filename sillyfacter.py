@@ -44,9 +44,10 @@ if __name__ == '__main__':
     hostname = platform.node().split(".")[0]
     scan_time = int(time.time())
     parser = argparse.ArgumentParser(
-        description='Collector agent for dependency mapper service. ' +
-                    'Gathers process, open file, socket information ' +
-                    'and then sends it to depmap backend database.')
+        description='Sillyfacter fetches facts about the state of the ' +
+                    'system. Gathers process, open file, socket info ' +
+                    'and then outputs a JSON (currently). Designed for ' +
+                    'dependency mappings.')
     parser.add_argument('--modules', type=str,
                         help='comma seperated list of modules ' +
                              'to be executed. Default list is ' +
@@ -54,7 +55,8 @@ if __name__ == '__main__':
                              'lesystem".',
                         default="process,user,network,os,filesystem")
     parser.add_argument('--out', type=str,
-                        help='URL for the backend database (neo4j/mongo) ' +
+                        help='[NOT IMPLEMENTED] ' +
+                             'URL for the backend database (neo4j/mongo) ' +
                              'or a file to write json output to. If nothing ' +
                              'is supplied it dumps JSON to stdout',
                         default=None)
@@ -67,10 +69,12 @@ if __name__ == '__main__':
                         default=0)
     parser.add_argument('--scan',
                         choices=('auto', 'new', 'last'),
-                        help='choose the scan type, usually "auto" ' +
+                        help='[NOT IMPLEMENTED] ' +
+                             'choose the scan type, usually "auto" ' +
                              'is the best.  [auto]', default='auto')
     parser.add_argument('--raw',
-                        help='Use raw output, default is false',
+                        help='[NOT IMPLEMENTED] ' +
+                             'Use raw output, default is false',
                         action='store_true')
     parser.add_argument('--version', action='version',
                         version=COLLECTOR_VERSION)
