@@ -13,7 +13,22 @@ Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Pyth
   - psutil
 But these would be taken care by **pip** hah!
 
-## Usage
+## Installation
+#### Using pip 
+```
+  
+  pip install sillyfacter
+  
+  #if netifaces installation fails
+  pip install --allow-all-external --allow-unverified netifaces sillyfacter
+
+```
+
+#### From source:
+**ToBeDone**
+
+
+### Usage
 Just execute **sillyfacter** and it should output result back in JSON
 
 ```
@@ -70,15 +85,6 @@ optional arguments:
 
 Why no facter for pure Python that outputs in JSON?
 
-## Installation
-#### Using pip 
-```pip install sillyfacter```
-
-#### **NOTE**: If netifaces installation fails
-```pip install --allow-all-external --allow-unverified netifaces sillyfacter```
-
-#### From source:
-**ToBeDone**
 
 ## Contributors
 
