@@ -11,26 +11,29 @@ Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Pyth
   - netaddr
   - netifaces
   - psutil
-But these would be taken care by **pip** hah!
+
+But these cab be taken care by using **pip** for installation
 
 ## Installation
 #### Using pip 
 ```
-  
-  pip install sillyfacter
-  
-  #if netifaces installation fails
-  pip install --allow-all-external --allow-unverified netifaces sillyfacter
+  # Needs pip v1.5
+  pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
+  # --upgrade ensures latest versions
+  # --allow-all-external and --allow-unverified is needed for netifaces :-(
 
+  # To upgrade pip
+  pip install --ugrade pip
+  
 ```
 
 #### From source:
 On Debiam
   - Ensure following things are installed
-    - apt-get install python-dev build-essential
-    - apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev
+    - ```apt-get install python-dev build-essential```
+    - ```apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev```
   - Download installer bash script and run it
-    - wget https://github.com/hihellobolke/sillyfacter/edit/master/installer && bash installer
+    - ```wget https://raw2.github.com/hihellobolke/sillyfacter/master/installer.bash && bash installer.bash```
 
 ### Usage
 Just execute **sillyfacter** and it should output result back in JSON
@@ -62,27 +65,28 @@ $ sillyfacter |head -20
 And yes there some **--help** too.
 
 ```
-$ sillyfacter -h 
+$ sillyfacter -h
 usage: sillyfacter [-h] [--modules MODULES] [--out OUT] [--log LOG]
-                      [--verbose] [--scan {auto,new,last}] [--raw] [--version]
+                   [--verbose] [--scan {auto,new,last}] [--raw] [--version]
 
-Collector agent for dependency mapper service. Gathers process, open file,
-socket information and then sends it to depmap backend database.
+Sillyfacter fetches facts about the state of the system. Gathers process, open
+file, socket info and then outputs a JSON (currently). Designed for dependency
+mappings.
 
 optional arguments:
   -h, --help            show this help message and exit
   --modules MODULES     comma seperated list of modules to be executed.
                         Default list is "process,network,user,os,filesystem".
-  --out OUT             URL for the backend database (neo4j/mongo) or a file
-                        to write json output to. If nothing is supplied it
-                        dumps JSON to stdout
+  --out OUT             [NOT IMPLEMENTED] URL for the backend database
+                        (neo4j/mongo) or a file to write json output to. If
+                        nothing is supplied it dumps JSON to stdout
   --log LOG             file to write logs to, otherwise logs are written to
                         console
   --verbose, -v         For higher verbosity use multiple "-v" options
   --scan {auto,new,last}
-                        choose the scan type, usually "auto" is the best.
-                        [auto]
-  --raw                 Use raw output, default is false
+                        [NOT IMPLEMENTED] choose the scan type, usually "auto"
+                        is the best. [auto]
+  --raw                 [NOT IMPLEMENTED] Use raw output, default is false
   --version             show program's version number and exit
 ```
 ## Motivation
