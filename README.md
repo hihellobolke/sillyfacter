@@ -26,7 +26,7 @@ On Debiam
     - apt-get install python-dev build-essential
     - apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev
   - Download installer bash script and run it
-    - wget https://github.com/hihellobolke/sillyfacter/edit/master/installer && bash installer
+    - wget https://raw2.github.com/hihellobolke/sillyfacter/master/installer.bash && bash installer
 
 ### Usage
 Just execute **sillyfacter** and it should output result back in JSON
