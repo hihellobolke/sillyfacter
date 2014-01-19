@@ -16,11 +16,7 @@ But these would be taken care by **pip** hah!
 ## Installation
 #### Using pip 
 ```
-  
-  pip install sillyfacter
-  
-  #if netifaces installation fails
-  pip install --allow-all-external --allow-unverified netifaces sillyfacter
+  pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
 
 ```
 
@@ -62,27 +58,28 @@ $ sillyfacter |head -20
 And yes there some **--help** too.
 
 ```
-$ sillyfacter -h 
+$ sillyfacter -h
 usage: sillyfacter [-h] [--modules MODULES] [--out OUT] [--log LOG]
-                      [--verbose] [--scan {auto,new,last}] [--raw] [--version]
+                   [--verbose] [--scan {auto,new,last}] [--raw] [--version]
 
-Collector agent for dependency mapper service. Gathers process, open file,
-socket information and then sends it to depmap backend database.
+Sillyfacter fetches facts about the state of the system. Gathers process, open
+file, socket info and then outputs a JSON (currently). Designed for dependency
+mappings.
 
 optional arguments:
   -h, --help            show this help message and exit
   --modules MODULES     comma seperated list of modules to be executed.
                         Default list is "process,network,user,os,filesystem".
-  --out OUT             URL for the backend database (neo4j/mongo) or a file
-                        to write json output to. If nothing is supplied it
-                        dumps JSON to stdout
+  --out OUT             [NOT IMPLEMENTED] URL for the backend database
+                        (neo4j/mongo) or a file to write json output to. If
+                        nothing is supplied it dumps JSON to stdout
   --log LOG             file to write logs to, otherwise logs are written to
                         console
   --verbose, -v         For higher verbosity use multiple "-v" options
   --scan {auto,new,last}
-                        choose the scan type, usually "auto" is the best.
-                        [auto]
-  --raw                 Use raw output, default is false
+                        [NOT IMPLEMENTED] choose the scan type, usually "auto"
+                        is the best. [auto]
+  --raw                 [NOT IMPLEMENTED] Use raw output, default is false
   --version             show program's version number and exit
 ```
 ## Motivation
