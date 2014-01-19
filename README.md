@@ -11,22 +11,25 @@ Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Pyth
   - netaddr
   - netifaces
   - psutil
-But these would be taken care by **pip** hah!
+
+But these cab be taken care by using **pip** for installation
 
 ## Installation
 #### Using pip 
 ```
   pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
+  # --upgrade ensures latest versions
+  # --allow-all-external and --allow-unverified is needed for netifaces :-(
 
 ```
 
 #### From source:
 On Debiam
   - Ensure following things are installed
-    - apt-get install python-dev build-essential
-    - apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev
+    - ```apt-get install python-dev build-essential```
+    - ```apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev```
   - Download installer bash script and run it
-    - wget https://raw2.github.com/hihellobolke/sillyfacter/master/installer.bash && bash installer
+    - ```wget https://raw2.github.com/hihellobolke/sillyfacter/master/installer.bash && bash installer.bash```
 
 ### Usage
 Just execute **sillyfacter** and it should output result back in JSON
