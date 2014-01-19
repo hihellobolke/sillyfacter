@@ -71,10 +71,13 @@ optional arguments:
 Why no facter for pure Python that outputs in JSON?
 
 ## Installation
-Using pip 
+#### Using pip 
 ```pip install sillyfacter```
 
-From source:
+#### **NOTE**: If netifaces installation fails
+```pip install --allow-all-external --allow-unverified netifaces sillyfacter```
+
+#### From source:
 **ToBeDone**
 
 ## Contributors
