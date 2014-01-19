@@ -17,10 +17,14 @@ But these cab be taken care by using **pip** for installation
 ## Installation
 #### Using pip 
 ```
+  # Needs pip v1.5
   pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
   # --upgrade ensures latest versions
   # --allow-all-external and --allow-unverified is needed for netifaces :-(
 
+  # To upgrade pip
+  pip install --ugrade pip
+  
 ```
 
 #### From source:
