@@ -6,10 +6,20 @@ import logging
 import platform
 import inspect
 import json
+import datetime
 from ..common import *
 
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            encoded_object = obj.strftime('%s')
+        else:
+            encoded_object = json.JSONEncoder.default(self, obj)
+        return encoded_object
 
 
 def fetchprocessor(modules=[]):
@@ -41,6 +51,7 @@ def fetchprocessor(modules=[]):
     jsonstr = json.dumps(fetch2json(fetched),
                          sort_keys=True,
                          indent=4,
+                         cls=DateTimeEncoder,
                          separators=(',', ': '))
     return jsonstr
 
@@ -90,6 +101,8 @@ def lookup(f, t=None):
 def fetch2json(f):
     myfslookup, mynslookup = lookup(f)
     fetched = {}
+    fetched["_scan_id"] = platform.node()
+    fetched["_scan_time"] = datetime.datetime.now()
     fetched["has"] = {}
     fetched["had"] = {}
 
@@ -138,7 +151,8 @@ def fetch2json(f):
                 newitem["exe_fs"] = f["process"][pid]["exe_fs"]
             newitem["user"] = f["process"][pid]["user"]
             newitem["createtime"] = f["process"][pid]["create_time"]
-            if fetched["boottime"] + 600 > newitem["createtime"]:
+            if fetched["boottime"] + datetime.timedelta(seconds=600) \
+                    > newitem["createtime"]:
                 _process_type.add("startup-prog")
             else:
                 _process_type.add("user-prog")

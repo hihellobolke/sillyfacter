@@ -6,6 +6,7 @@ import logging
 import inspect
 import os
 import re
+import datetime
 from .common import *
 ##
 
@@ -32,11 +33,12 @@ def fetch():
     host_props["memory"] = psutil.virtual_memory().total
     host_props["memory_used"] = psutil.virtual_memory().percent
     host_props["cpu"] = psutil.NUM_CPUS
-    host_props["boottime"] = psutil.get_boot_time()
+    dt = datetime.datetime.fromtimestamp
+    host_props["boottime"] = dt(psutil.get_boot_time())
     host_props["cpu_used"] = psutil.cpu_percent(interval=1, percpu=False)
     host_props["hardwareisa"] = platform.processor()
     host_props["hardwaremodel"] = platform.processor()
-    host_props["id"] = os.environ['USER']
+    host_props["user"] = os.environ['USER']
     ostype = os.uname()[0]
     if ostype == "Linux":
         host_props["kernel_release"] = platform.uname()[2]

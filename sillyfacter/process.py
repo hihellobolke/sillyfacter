@@ -7,6 +7,7 @@ import re
 import netaddr
 import logging
 import inspect
+import datetime
 from collections import deque
 from .common import *
 
@@ -24,6 +25,7 @@ def fetch():
     allps = {}
     openfiles = {}
     nslookup = {}
+    dt = datetime.datetime.fromtimestamp
     for p in psutil.process_iter():
         try:
             if (len(p.cmdline) > 0):
@@ -33,7 +35,7 @@ def fetch():
                     "cmdline": " ".join(p.cmdline),
                     "user": p.username,
                     "memory": p.get_memory_percent(),
-                    "create_time": int(p.create_time),
+                    "create_time": dt(int(p.create_time)),
                     "uid": p.uids.effective,
                     "gids": p.gids.effective,
                     "fd_count": p.get_num_fds(),
