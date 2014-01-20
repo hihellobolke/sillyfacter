@@ -14,7 +14,7 @@ Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Pyth
 
 But these cab be taken care by using **pip** for installation
 
-## Installation
+### Installation
 #### Using pip 
 ```
   # Needs pip v1.5
@@ -89,15 +89,15 @@ optional arguments:
   --raw                 [NOT IMPLEMENTED] Use raw output, default is false
   --version             show program's version number and exit
 ```
-## Motivation
+### Motivation
 
 Why no facter for pure Python that outputs in JSON?
 
 
-## Contributors
+### Contributors
 
 Email g@ut.am
 
-## License
+### License
 
 This is Apache Licenced.
