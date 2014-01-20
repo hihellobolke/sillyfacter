@@ -47,7 +47,10 @@ set -x
 export NAME=python
 export PREFIX=$(cd ~ && pwd)/local
 export TMPDIR=$(mktemp -d)
-cd $TMPDIR || si "Error cd to $TMPDIR" && exit 1
+export CURDIR=$(pwd)
+
+
+( cd $TMPDIR || si "Error cd to $TMPDIR" && exit 1
 
 
 MSG="Downloading python, ez_setup, pip"
@@ -65,6 +68,7 @@ MSG="compiling python"
 ERR="compiling failed"
 is $MSG && \
     (
+        yell
         cd *ython*/ && \
             ./configure --prefix=$PREFIX && \
             make && \
@@ -72,10 +76,11 @@ is $MSG && \
     ) || si $ERR
 
 
-MSG="compiling python"
-ERR="compiling failed"
+MSG="Installing setuptools and pip"
+ERR="Failed installing setuptools and pip"
 is $MSG && \
     (
+        yell
         PIP_DOWNLOAD_CACHE=$TMPDIR
         unset PIP_REQUIRE_VIRTUALENV
         unset PIP_VIRTUALENV_BASE
@@ -89,7 +94,10 @@ MSG="pip installing sillyfacter "
 ERR="pip installation failed"
 is $MSG && \
     (
-            $PREFIX/bin/pip install --allow-all-external --allow-unverified netifaces sillyfacter
+        yell
+        $PREFIX/bin/pip install --allow-all-external --allow-unverified netifaces sillyfacter
     ) || si $ERR
 
+)
+[[ -d $TMPDIR ]] && rm -rf $TMPDIR
 green "Installed at $PREFIX/bin/sillyfacter"

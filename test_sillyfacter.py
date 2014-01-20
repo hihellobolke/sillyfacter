@@ -101,5 +101,5 @@ if __name__ == '__main__':
         except:
             raise
         else:
-            print("{}".format(pprint.pformat(output)))
+            print("{}".format(output))
     l.info("Bye bye")

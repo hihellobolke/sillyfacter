@@ -124,6 +124,6 @@ def fetch_linux():
     else:
         operatingsystem = "Unknown"
         operatingsystemrelease = "Unknown"
-    fetch["operatingsystem"] = operatingsystem
-    fetch["operatingsystemreleasestring"] = operatingsystemrelease
+    fetch["operatingsystem"] = operatingsystem.strip()
+    fetch["operatingsystemreleasestring"] = operatingsystemrelease.strip()
     return fetch

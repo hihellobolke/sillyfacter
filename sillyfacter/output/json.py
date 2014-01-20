@@ -5,6 +5,7 @@ import re
 import logging
 import platform
 import inspect
+import json
 from ..common import *
 
 MODULEFILE = re.sub('\.py', '',
@@ -37,7 +38,11 @@ def fetchprocessor(modules=[]):
                                                                  _))
         else:
             l.info("fetch success for module {}".format(modulename))
-    return fetch2json(fetched)
+    jsonstr = json.dumps(fetch2json(fetched),
+                         sort_keys=True,
+                         indent=4,
+                         separators=(',', ': '))
+    return jsonstr
 
 
 def lookup(f, t=None):

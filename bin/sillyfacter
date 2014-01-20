@@ -30,7 +30,7 @@ import re
 
 import sillyfacter.common
 
-COLLECTOR_VERSION = '0.3.0.2'
+COLLECTOR_VERSION = '0.3.0.3'
 DEBUG = False
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
@@ -98,5 +98,5 @@ if __name__ == '__main__':
         except:
             raise
         else:
-            print("{}".format(pprint.pformat(output)))
+            print("{}".format(output))
     l.info("Bye bye")
