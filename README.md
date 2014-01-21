@@ -137,8 +137,7 @@ Why no facter in pure Python that outputs in JSON?
 
 ### Contributors
 
-Email g@ut.am
-More info: https://github.com/hihellobolke/sillyfacter
+* More info: https://github.com/hihellobolke/sillyfacter
 
 ### License
 
