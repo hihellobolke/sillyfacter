@@ -25,21 +25,27 @@ Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Pyth
 But these are taken care by **pip** during installation
 
 #### Using pip
+
+###### Upgrade pip to v1.5
+
 ```
   # Needs pip v1.5
   # So just upgrade it anyways...
-  pip install --ugrade pip
+  pip install --upgrade pip
+```
 
+###### Pip install
+The netifaces module is a bit irritating... so have to use extra options.
 
+```
   pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
   # --upgrade ensures latest versions
   # --allow-all-external and --allow-unverified is needed for netifaces :-(
 
-
 ```
 
 #### From source:
-On Debiam
+On Debian
   - Ensure following things are installed
     - ```apt-get install python-dev build-essential```
     - ```apt-get install libbz2-dev libssl-dev libsqlite3-dev libreadline6-dev ncurses-dev```
