@@ -22,38 +22,26 @@ class DateTimeEncoder(json.JSONEncoder):
         return encoded_object
 
 
-def fetchprocessor(modules=[]):
+def output(modules=[], out=None):
     ldict = {"step": MODULEFILE + "/" + inspect.stack()[0][3],
              "hostname": platform.node().split(".")[0]}
     l = logging.LoggerAdapter(fetch_lg(), ldict)
     #
-    fetched = {}
-    fetchable = {}
-    for m in modules:
-        try:
-            fetchable[m] = __import__("sillyfacter.{}".format(m),
-                                      fromlist=[m],
-                                      level=0)
-        except Exception as _:
-            l.exception("Import exception for module '{}'".format(m))
-            l.error("Import failure for module '{}'".format(m))
-        else:
-            l.info("Import success for module '{}'".format(m))
-    #
-    for modulename, moduleobj in fetchable.iteritems():
-        try:
-            fetched[modulename] = getattr(moduleobj, "fetch")()
-        except Exception as _:
-            l.exception("fetch failure for module {}, {}".format(modulename,
-                                                                 _))
-        else:
-            l.info("fetch success for module {}".format(modulename))
-    jsonstr = json.dumps(fetch2json(fetched),
-                         sort_keys=True,
-                         indent=4,
-                         cls=DateTimeEncoder,
-                         separators=(',', ': '))
-    return jsonstr
+    l.info("Gathering output...")
+    fetched, fetchable = fetchprocessor(modules)
+    retval = None
+    try:
+        jsonstr = json.dumps(fetch2json(fetched,
+                                        fetchable),
+                             sort_keys=True,
+                             indent=4,
+                             cls=DateTimeEncoder,
+                             separators=(',', ': '))
+    except:
+        l.exception("Unable to convert obj to JSON")
+    else:
+        retval = jsonstr
+    return retval
 
 
 def lookup(f, t=None):
@@ -98,7 +86,11 @@ def lookup(f, t=None):
         return _nslookup
 
 
-def fetch2json(f):
+def fetch2json(f, fetchable):
+    ldict = {"step": MODULEFILE + "/" + inspect.stack()[0][3],
+             "hostname": platform.node().split(".")[0]}
+    l = logging.LoggerAdapter(fetch_lg(), ldict)
+    #
     myfslookup, mynslookup = lookup(f)
     fetched = {}
     fetched["_scan_id"] = platform.node()
@@ -112,20 +104,8 @@ def fetch2json(f):
             fetched[item] = val
 
     # special
-    if "eman" in f:
-        for item, val in f["eman"].iteritems():
-            if re.match('eman_.*_[0-9]+', item):
-                n = re.match('(eman_.*)_[0-9]+', item).group(1)
-                try:
-                    fetched[n].append(val)
-                except:
-                    fetched[n] = [val]
-            else:
-                fetched[item] = val
-
-    # host filesystems
-    if "filesystem" in f:
-        fetched["has"]["filesystem"] = f["filesystem"]
+    if "custom" in f:
+        pass
 
     # host networks
     if "network" in f:
@@ -205,4 +185,19 @@ def fetch2json(f):
         if "last" in users:
             fetched["had"]["user"] = users["last"]
     #
+    if "custom" in f:
+        fetched_custom = {}
+        for modulename, val in f["custom"].iteritems():
+            try:
+                m = fetchable["custom"][modulename]
+                if hasattr(m, "output_for_json"):
+                    fetched_custom = getattr(m, "output_for_json")(val)
+                elif hasattr(m, "output"):
+                    fetched_custom = getattr(m, "output")(val)
+                else:
+                    l.error("Could not find outout handler in module " +
+                            "'{}'".format(m))
+            except:
+                l.error("custom module {} not loaded".format(modulename))
+        fetched = dict(fetched, **fetched_custom)
     return fetched

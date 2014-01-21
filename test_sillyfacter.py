@@ -26,7 +26,6 @@ import time
 import logging
 import inspect
 import argparse
-import pprint
 import re
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -34,10 +33,11 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 import sillyfacter.common
 
+COLLECTOR_VERSION = '9.9.9.9'
 DEBUG = False
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
-
+MODULES = ["process", "network", "user", "os", "filesystem"]
 
 if __name__ == '__main__':
     hostname = platform.node().split(".")[0]
@@ -48,23 +48,22 @@ if __name__ == '__main__':
                     'and then outputs a JSON (currently). Designed for ' +
                     'dependency mappings.')
     parser.add_argument('--modules', type=str,
-                        help='comma seperated list of modules ' +
-                             'to be executed. Default list is ' +
-                             '"process,network,user,os,fi' +
-                             'lesystem".',
-                        default="process,user,network,os,filesystem")
+                        help='"all" or comma seperated list of modules ' +
+                             'to be executed. Default is ' +
+                             '"all" which is expanded to include ' +
+                             '"{}". '.format(",".join(MODULES)),
+                        default="all")
     parser.add_argument('--out', type=str,
-                        help='[NOT IMPLEMENTED] ' +
-                             'URL for the backend database (neo4j/mongo) ' +
-                             'or a file to write json output to. If nothing ' +
-                             'is supplied it dumps JSON to stdout',
+                        help='Pass URL for the backend mongo database ' +
+                             '(E.g. mongodb://localhost:27017/). '
+                             'If nothing is supplied it dumps JSON to stdout',
                         default=None)
     parser.add_argument('--log', type=str,
                         help='file to write logs to, otherwise logs are ' +
                         'written to console',
                         default=None)
     parser.add_argument('--verbose', '-v', action='count',
-                        help='For higher verbosity use multiple "-v" options',
+                        help='Use multiple "-v" options',
                         default=0)
     parser.add_argument('--scan',
                         choices=('auto', 'new', 'last'),
@@ -76,7 +75,7 @@ if __name__ == '__main__':
                              'Use raw output, default is false',
                         action='store_true')
     parser.add_argument('--version', action='version',
-                        version="0.0")
+                        version=COLLECTOR_VERSION)
 
     args = parser.parse_args()
     #
@@ -87,7 +86,18 @@ if __name__ == '__main__':
     l = logging.LoggerAdapter(sillyfacter.common.fetch_lg(), ldict)
     #
     fetchable = {}
-    modules = args.modules.split(',')
+    modules = []
+    try:
+        for m in args.modules.split(','):
+            if re.match("all", m, re.IGNORECASE):
+                modules += MODULES
+            else:
+                modules.append(m)
+    except:
+        modules = MODULES
+    finally:
+        modules = list(set(modules))
+
     #
     if args.out is None or \
             re.match('^[/a-z0-9].*\.json', args.out, re.IGNORECASE):
@@ -97,9 +107,25 @@ if __name__ == '__main__':
             l.info("Importing output filter '{}'".format(outmodule))
             outmodule = __import__("sillyfacter.output.{}".format(outmodule),
                                    fromlist=[outmodule])
-            output = getattr(outmodule, "fetchprocessor")(modules)
+            output = getattr(outmodule, "output")(modules,
+                                                  args.out)
         except:
             raise
         else:
             print("{}".format(output))
+    elif re.match('^mongodb\://.*', args.out):
+        outmodule = "mongo"
+        output = None
+        try:
+            l.info("Importing output filter '{}'".format(outmodule))
+            outmodule = __import__("sillyfacter.output.{}".format(outmodule),
+                                   fromlist=[outmodule])
+            output = getattr(outmodule, "output")(modules,
+                                                  args.out)
+        except:
+            raise
+        else:
+            print("{}".format(output))
+    else:
+        print("Invalid argument '{}' passed".format(args.out))
     l.info("Bye bye")

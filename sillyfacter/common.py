@@ -6,9 +6,13 @@ import subprocess
 import threading
 import logging
 import socket
-#import inspect
+import inspect
 import tempfile
+import platform
 #from common import *
+
+MODULEFILE = re.sub('\.py', '',
+                            os.path.basename(inspect.stack()[0][1]))
 
 
 def debugprint(log_level=None):
@@ -129,6 +133,70 @@ def fetch_dns(ip="127.0.0.1"):
         else:
             name = ip
     return name
+
+
+def importer(modules=[]):
+    ldict = {"step": MODULEFILE + "/" + inspect.stack()[0][3],
+             "hostname": platform.node().split(".")[0]}
+    l = logging.LoggerAdapter(fetch_lg(), ldict)
+    #
+    fetchable = {"custom": {}}
+    for m in modules:
+        try:
+            fetchable["custom"][m] = \
+                __import__("sillyfacter.custom.{}".format(m),
+                           fromlist=[m],
+                           level=0)
+        except Exception as _:
+            l.exception("Import exception for custon module 'custom/{}' " +
+                        ": {}".format(m, _))
+            try:
+                fetchable[m] = __import__("sillyfacter.{}".format(m),
+                                          fromlist=[m],
+                                          level=0)
+            except Exception as _:
+                l.exception("Import exception for module " +
+                            "'{}': {}".format(m, _))
+                l.error("Import failure for module '{}'".format(m))
+            else:
+                l.info("Import success for module '{}'".format(m))
+        else:
+            l.info("Import success for  module 'custom/{}'".format(m))
+    return fetchable
+
+
+def fetcher(fetchable={}):
+    ldict = {"step": MODULEFILE + "/" + inspect.stack()[0][3],
+             "hostname": platform.node().split(".")[0]}
+    l = logging.LoggerAdapter(fetch_lg(), ldict)
+    #
+    fetched = {}
+    for modulename, moduleobj in fetchable.iteritems():
+        if modulename is not "custom":
+            try:
+                fetched[modulename] = getattr(moduleobj, "fetch")()
+            except Exception as _:
+                l.exception("fetch failure for module " +
+                            "{}, {}".format(modulename, _))
+            else:
+                l.info("fetch success for module {}".format(modulename))
+        else:
+            if "custom" not in fetched:
+                fetched["custom"] = {}
+            for modulename, moduleobj in fetchable["custom"].iteritems():
+                try:
+                    fetched["custom"][modulename] = \
+                        getattr(moduleobj, "fetch")()
+                except Exception as _:
+                    l.exception("fetch failure for module " +
+                                "{}, {}".format(modulename, _))
+                else:
+                    l.info("fetch success for module {}".format(modulename))
+    return fetched, fetchable
+
+
+def fetchprocessor(modules=[]):
+    return fetcher(importer(modules))
 
 
 def fetch_lg(name=None):

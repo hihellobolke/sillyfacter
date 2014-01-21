@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
+import time
+
 name = 'sillyfacter'
 setup(name=name,
       version=open("bin/{}".format(name)).read().split('COLLECTOR_VERSION')[1].split('\'')[1],
@@ -20,6 +22,7 @@ Sillyfacter prints JSON facts related to the state of the system. The state here
           "psutil >= 1.2.1",
           "netifaces >= 0.8",
           "netaddr >= 0.7.10",
+          "pymongo",
           # -*- Extra requirements: -*-
       ],
       entry_points="""

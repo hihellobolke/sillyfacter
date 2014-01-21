@@ -4,6 +4,7 @@ MANIFEST.in
 README.txt
 setup.cfg
 setup.py
+Sillyfacter.egg-info/SOURCES.txt
 bin/sillyfacter
 sillyfacter/__init__.py
 sillyfacter/common.py
@@ -19,6 +20,8 @@ sillyfacter.egg-info/entry_points.txt
 sillyfacter.egg-info/not-zip-safe
 sillyfacter.egg-info/requires.txt
 sillyfacter.egg-info/top_level.txt
-sillyfacter/customs/__init__.py
+sillyfacter/custom/__init__.py
+sillyfacter/custom/eman.py
 sillyfacter/output/__init__.py
 sillyfacter/output/json.py
+sillyfacter/output/mongo.py

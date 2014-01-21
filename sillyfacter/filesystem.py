@@ -35,7 +35,7 @@ def fetch():
                 partition["total"] = disk_usage.total
                 partition["used"] = disk_usage.used
                 partition["free"] = disk_usage.free
-                partition["percent"] = disk_usage.free
+                partition["percent"] = disk_usage.percent
         fs.append(partition)
     for p in psutil.disk_partitions(all=True):
         if (re.match('nfs|autofs', p.fstype, re.IGNORECASE)):
