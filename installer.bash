@@ -38,66 +38,68 @@ is() {
         return 1
     else
         [[ ${_ANY_ERROR} == "NO" ]] && green $now ${_is:-"All ok, continuing"} $@ && return 0;
-        red $now "ERROR:" ${_is:-""} $@ && return 1;
+        red $now "SKIPPING:" ${_is:-""} $@ && return 1;
     fi
 }
 
 
-set -x
-export NAME=python
 export PREFIX=$(cd ~ && pwd)/local
 export TMPDIR=$(mktemp -d)
-export CURDIR=$(pwd)
+
+is "Installing at $PREFIX" && \
+    ( 
+        cd $TMPDIR || si "cd to $TMPDIR failed"
+
+        MSG="Downloading python, ez_setup, pip"
+        ERR="Error downloding"
+        is $MSG && \
+            (
+                yell
+                (\wget --no-check-certificate http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz && tar -zxf *ython* && rm Python*tgz) &&\
+                (\wget --no-check-certificate https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py) && \
+                (\wget --no-check-certificate https://raw.github.com/pypa/pip/master/contrib/get-pip.py)
+            ) || si $ERR
 
 
-( cd $TMPDIR || si "Error cd to $TMPDIR" && exit 1
+        MSG="Compiling & Install Python 2.7.6 at $PREFIX"
+        ERR="compiling"
+        is $MSG && \
+            (
+                yell
+                cd *ython*/ && \
+                    ./configure --prefix=$PREFIX && \
+                    make && \
+                    make install
+            ) || si $ERR
 
 
-MSG="Downloading python, ez_setup, pip"
-ERR="Failed downloding"
-is $MSG && \
-    (
-        yell
-        (\wget --no-check-certificate http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz && tar -zxf *ython* && rm Python*tgz) &&\
-        (\wget --no-check-certificate https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py) && \
-        (\wget --no-check-certificate https://raw.github.com/pypa/pip/master/contrib/get-pip.py)
-    ) || si $ERR
+        MSG="Installing setuptools and pip"
+        ERR="Installing setuptools and pip :-("
+        is $MSG && \
+            (
+                yell
+                PIP_DOWNLOAD_CACHE=$TMPDIR
+                unset PIP_REQUIRE_VIRTUALENV
+                unset PIP_VIRTUALENV_BASE
+                cd $TMPDIR && \
+                $PREFIX/bin/python ez_setup.py && \
+                $PREFIX/bin/python get-pip.py
+            ) || si $ERR
 
 
-MSG="compiling python"
-ERR="compiling failed"
-is $MSG && \
-    (
-        yell
-        cd *ython*/ && \
-            ./configure --prefix=$PREFIX && \
-            make && \
-            make install
-    ) || si $ERR
+        MSG="Make pip install sillyfacter "
+        ERR="pip installation failed :-("
+        is $MSG && \
+            (
+                yell
+                $PREFIX/bin/pip install --allow-all-external --allow-unverified netifaces sillyfacter
+            ) || si $ERR
 
+    ) || si "Cleaning up"
+RETVAL=$?
 
-MSG="Installing setuptools and pip"
-ERR="Failed installing setuptools and pip"
-is $MSG && \
-    (
-        yell
-        PIP_DOWNLOAD_CACHE=$TMPDIR
-        unset PIP_REQUIRE_VIRTUALENV
-        unset PIP_VIRTUALENV_BASE
-        cd $TMPDIR/$NAME && \
-        $PREFIX/bin/python ez_setup.py && \
-        $PREFIX/bin/python get-pip.py
-    ) || si $ERR
-
-
-MSG="pip installing sillyfacter "
-ERR="pip installation failed"
-is $MSG && \
-    (
-        yell
-        $PREFIX/bin/pip install --allow-all-external --allow-unverified netifaces sillyfacter
-    ) || si $ERR
-
-)
-[[ -d $TMPDIR ]] && rm -rf $TMPDIR
-green "Installed at $PREFIX/bin/sillyfacter"
+if [[ $RETVAL == 0 ]]; then
+    green "Checkout $PREFIX/bin/sillyfacter"
+else
+    red "Installation failed"
+fi
