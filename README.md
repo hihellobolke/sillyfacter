@@ -3,9 +3,12 @@
 Sillyfacter prints JSON facts related to the **state** of the system. The state here mean overview of the process running, their connections and open files. You can also pass mongodb url to store in database.
 
 Current focus on:
-  - Portable *.nix
+  - Portable *.nix 
   - Expandable using custom agents/modules
-  - Output/filter to stdout or mongo db using pymongo or (Celery?)
+  - Output to stdout as JSON or write to mongo db
+
+To be done:
+  - Output to RabbitMQ
 
 More info: [sillyfacter at github](https://github.com/hihellobolke/sillyfacter)
 
@@ -15,12 +18,14 @@ More info: [sillyfacter at github](https://github.com/hihellobolke/sillyfacter)
 
 #### Requirements
 
-Desgined in Python 2.7, for *nix systems. Tested on Mac, RHEL, Solaris. The Python package dependencies are:
+Desgined in Python 2.7, for *nix systems. Tested on recent Mac OS X, RHEL (v5.5, v6.2), Ubuntu (v13). The Python package dependencies are:
 * netaddr
 * netifaces
 * psutil
-* pymongo
+* pymongo (for writing to MongoDB)
 * pip >= v1.5.1
+* pika (for writing to RabbitMQ) 
+
 
 But these are taken care by **pip** during installation
 
