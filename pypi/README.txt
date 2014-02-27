@@ -120,9 +120,9 @@ And yes there some **--help** too.
 ::
 
     $ python sillyfacter --help
-    usage: test_sillyfacter.py [-h] [--modules MODULES] [--out OUT] [--log LOG]
-                               [--verbose] [--scan {auto,new,last}] [--raw]
-                               [--version]
+    usage: sillyfacter [-h] [--modules MODULES] [--out OUT] [--log LOG]
+                            [--verbose] [--strict] [--debug]
+                            [--scan {auto,new,last}] [--raw] [--version]
 
     Sillyfacter fetches facts about the state of the system. Gathers process, open
     file, socket info and then outputs a JSON (currently). Designed for dependency
@@ -130,15 +130,20 @@ And yes there some **--help** too.
 
     optional arguments:
       -h, --help            show this help message and exit
-      --modules MODULES     "all" or comma seperated list of modules to be
-                            executed. Default is "all" which is expanded to
-                            include "process,network,user,os,filesystem".
-      --out OUT             Pass URL for the backend mongo database (E.g.
+      --modules MODULES     comma seperated list of modules to be executed.
+                            Default list is "all" which is expanded to include
+                            "process,network,user,os,filesystem"
+      --out OUT             URL for the backend Mongo database (E.g.
                             mongodb://localhost:27017/). If nothing is supplied it
                             dumps JSON to stdout
       --log LOG             file to write logs to, otherwise logs are written to
                             console
       --verbose, -v         Use multiple "-v" options
+      --strict              If selected will error out on every exeption Note:
+                            Useful when debugging only [False]
+      --debug               If selected will emit very debugging logs if exception
+                            are encountered. Note: Useful when debugging only
+                            [False]
       --scan {auto,new,last}
                             [NOT IMPLEMENTED] choose the scan type, usually "auto"
                             is the best. [auto]

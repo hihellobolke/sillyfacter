@@ -3,7 +3,7 @@
 Sillyfacter prints JSON facts related to the **state** of the system. The state here mean overview of the process running, their connections and open files. You can also pass mongodb url to store in database.
 
 Current focus on:
-  - Portable *.nix 
+  - Portable *.nix
   - Expandable using custom agents/modules
   - Output to stdout as JSON or write to mongo db
 
@@ -24,7 +24,9 @@ Desgined in Python 2.7, for *nix systems. Tested on recent Mac OS X, RHEL (v5.5,
 * psutil
 * pymongo (for writing to MongoDB)
 * pip >= v1.5.1
-* pika (for writing to RabbitMQ) 
+
+Optional
+* pika (?? for writing to RabbitMQ)
 
 
 But these are taken care by **pip** during installation
@@ -109,9 +111,9 @@ And yes there some **--help** too.
 
 ```
     $ python sillyfacter --help
-    usage: test_sillyfacter.py [-h] [--modules MODULES] [--out OUT] [--log LOG]
-                               [--verbose] [--scan {auto,new,last}] [--raw]
-                               [--version]
+    usage: sillyfacter [-h] [--modules MODULES] [--out OUT] [--log LOG]
+                            [--verbose] [--strict] [--debug]
+                            [--scan {auto,new,last}] [--raw] [--version]
 
     Sillyfacter fetches facts about the state of the system. Gathers process, open
     file, socket info and then outputs a JSON (currently). Designed for dependency
@@ -119,15 +121,20 @@ And yes there some **--help** too.
 
     optional arguments:
       -h, --help            show this help message and exit
-      --modules MODULES     "all" or comma seperated list of modules to be
-                            executed. Default is "all" which is expanded to
-                            include "process,network,user,os,filesystem".
-      --out OUT             Pass URL for the backend mongo database (E.g.
+      --modules MODULES     comma seperated list of modules to be executed.
+                            Default list is "all" which is expanded to include
+                            "process,network,user,os,filesystem"
+      --out OUT             URL for the backend Mongo database (E.g.
                             mongodb://localhost:27017/). If nothing is supplied it
                             dumps JSON to stdout
       --log LOG             file to write logs to, otherwise logs are written to
                             console
       --verbose, -v         Use multiple "-v" options
+      --strict              If selected will error out on every exeption Note:
+                            Useful when debugging only [False]
+      --debug               If selected will emit very debugging logs if exception
+                            are encountered. Note: Useful when debugging only
+                            [False]
       --scan {auto,new,last}
                             [NOT IMPLEMENTED] choose the scan type, usually "auto"
                             is the best. [auto]

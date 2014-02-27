@@ -9,10 +9,15 @@ import socket
 import inspect
 import tempfile
 import platform
+import stat
+import shlex
+import sillyfacter.config
 #from common import *
 
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
+DEBUG = sillyfacter.config.DEBUG
+STRICT = sillyfacter.config.STRICT
 
 
 def debugprint(log_level=None):
@@ -31,7 +36,7 @@ def debugprint(log_level=None):
     def noop(a=[], b=""):
         return []
 
-    if log_level == "DEBUG":
+    if log_level == "DEBUG" or sillyfacter.config.DEBUG:
         return dprint
     else:
         return noop
@@ -79,9 +84,15 @@ def _execute(cmd, stdout=None, stderr=None):
                                 stdout=stdout,
                                 stderr=stderr)
         retval = proc.wait()
-    except:
+    except Exception as _:
+        if STRICT:
+            raise
+        if DEBUG:
+            print("Exception has occurred in _execute(cmd, stdout, stderr)")
+            dp = debugprint()
+            dp("Error in executing '{}' exception is '{}'".
+               format(cmd, _), "_execute")
         pass
-        #raise
     return retval
 
 
@@ -92,6 +103,8 @@ def _read_unlink_handle(fh, fn):
             fd.seek(0)
             retval = fd.readlines()
     except:
+        if STRICT:
+            raise
         pass
     finally:
         try:
@@ -124,6 +137,76 @@ class Command(object):
         return self.retval
 
 
+def run_command(args):
+    if isinstance(args, basestring):
+        args = shlex.split(args)
+    try:
+        prg = Command(args)
+        prg.run()
+    except Exception as _:
+        if STRICT:
+            raise
+        if DEBUG:
+            dp = debugprint()
+            dp("Error in executing '{}' exception is '{}'".
+               format(args, _), "run_command")
+        rc = 1
+        out = "UnknownError"
+        err = "UnknownError"
+    else:
+        rc, out, err = prg.retval, ''.join(prg.output), ''.join(prg.errput)
+    return (rc, out, err)
+
+
+def is_executable(path):
+    '''is the given path executable?'''
+    return (stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
+            or stat.S_IXGRP & os.stat(path)[stat.ST_MODE]
+            or stat.S_IXOTH & os.stat(path)[stat.ST_MODE])
+
+
+def get_bin_path(arg, required=False, opt_dirs=[]):
+    '''
+    find system executable in PATH.
+    Optional arguments:
+       - required:  if executable is not found and required is true, fail_json
+       - opt_dirs:  optional list of directories to search in addition to PATH
+    if found return full path; otherwise return None
+    '''
+    sbin_paths = ['/sbin', '/usr/sbin', '/usr/local/sbin']
+    paths = []
+    for d in opt_dirs:
+        if d is not None and os.path.exists(d):
+            paths.append(d)
+    paths += os.environ.get('PATH', '').split(os.pathsep)
+    bin_path = None
+    # mangle PATH to include /sbin dirs
+    for p in sbin_paths:
+        if p not in paths and os.path.exists(p):
+            paths.append(p)
+    for d in paths:
+        path = os.path.join(d, arg)
+        if os.path.exists(path) and is_executable(path):
+            bin_path = path
+            break
+    return bin_path
+
+
+def pretty_bytes(size=0):
+    ranges = ((1 << 70L, 'ZB'),
+              (1 << 60L, 'EB'),
+              (1 << 50L, 'PB'),
+              (1 << 40L, 'TB'),
+              (1 << 30L, 'GB'),
+              (1 << 20L, 'MB'),
+              (1 << 10L, 'KB'),
+              (1, 'Bytes'))
+    for limit, suffix in ranges:
+        if size >= limit:
+            break
+    return '%.2f %s' % (float(size)/limit, suffix)
+
+
 def fetch_dns(ip="127.0.0.1"):
     try:
         name = socket.gethostbyaddr(str(ip))[0]
@@ -148,13 +231,14 @@ def importer(modules=[]):
                            fromlist=[m],
                            level=0)
         except Exception as _:
-            l.exception("Import exception for custon module 'custom/{}' " +
-                        ": {}".format(m, _))
+            l.info("No custon module 'custom/{}' available".format(m))
             try:
                 fetchable[m] = __import__("sillyfacter.{}".format(m),
                                           fromlist=[m],
                                           level=0)
             except Exception as _:
+                if STRICT:
+                    raise
                 l.exception("Import exception for module " +
                             "'{}': {}".format(m, _))
                 l.error("Import failure for module '{}'".format(m))
@@ -176,8 +260,14 @@ def fetcher(fetchable={}):
             try:
                 fetched[modulename] = getattr(moduleobj, "fetch")()
             except Exception as _:
-                l.exception("fetch failure for module " +
-                            "{}, {}".format(modulename, _))
+                if STRICT:
+                    raise
+                if DEBUG:
+                    l.excetion("fetch failure for module " +
+                               "{}".format(modulename))
+                else:
+                    l.warning("fetch failure for module " +
+                              "{}, {}".format(modulename, _))
             else:
                 l.info("fetch success for module {}".format(modulename))
         else:
@@ -188,8 +278,14 @@ def fetcher(fetchable={}):
                     fetched["custom"][modulename] = \
                         getattr(moduleobj, "fetch")()
                 except Exception as _:
-                    l.exception("fetch failure for module " +
-                                "{}, {}".format(modulename, _))
+                    if STRICT:
+                        raise
+                    if DEBUG:
+                        l.exception("fetch failure for module " +
+                                    "{}".format(modulename))
+                    else:
+                        l.exception("fetch failure for module " +
+                                    "{}, {}".format(modulename, _))
                 else:
                     l.info("fetch success for module {}".format(modulename))
     return fetched, fetchable

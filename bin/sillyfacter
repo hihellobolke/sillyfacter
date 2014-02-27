@@ -26,14 +26,42 @@ import logging
 import inspect
 import argparse
 import re
+import sys
 
-import sillyfacter.common
-
-COLLECTOR_VERSION = '0.3.1.5'
 DEBUG = False
+# -------------------------------------------------------------------- #
+# for hacky tests
+if os.path.basename(__file__) == 'test_sillyfacter':
+    sys.path = [sys.path[0],
+                os.path.dirname(os.path.abspath(__file__))] + sys.path
+    DEBUG = True
+# -------------------------------------------------------------------- #
+
+import sillyfacter.config
+
+
+VERSION = sillyfacter.config.VERSION
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
 MODULES = ["process", "network", "user", "os", "filesystem"]
+
+# -------------------------------------------------------------------- #
+# for debug:
+def enable_debug():
+    global VERSION
+    global DEBUG
+    VERSION += \
+        '-test-{}'.format(int(time.time()))
+    DEBUG = True
+    sillyfacter.config.VERSION = VERSION
+    sillyfacter.config.DEBUG = DEBUG
+    sillyfacter.config.STRICT = False
+    print("-"*79)
+    print(" sys.path : {}".format(sys.path))
+    print(" version  : {}".format(VERSION))
+    print(" debug    : {}".format(DEBUG))
+    print("-"*79)
+# -------------------------------------------------------------------- #
 
 
 if __name__ == '__main__':
@@ -49,7 +77,7 @@ if __name__ == '__main__':
                              'to be executed. Default list is ' +
                              '"all" which is expanded to include ' +
                              '"{}"'.format(",".join(MODULES)),
-                        default="process,user,network,os,filesystem")
+                        default="process,user,network,os,filesystem,ansible")
     parser.add_argument('--out', type=str,
                         help='URL for the backend Mongo database ' +
                              '(E.g. mongodb://localhost:27017/). '
@@ -62,6 +90,17 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', '-v', action='count',
                         help='Use multiple "-v" options',
                         default=0)
+    parser.add_argument('--strict',
+                        help='If selected will error out on every exeption ' +
+                             'Note: Useful when debugging only [False]',
+                             default=False,
+                             action='store_true')
+    parser.add_argument('--debug',
+                        help='If selected will emit very debugging logs if ' +
+                             'exception are encountered. ' +
+                             'Note: Useful when debugging only [False]',
+                             default=False,
+                             action='store_true')
     parser.add_argument('--scan',
                         choices=('auto', 'new', 'last'),
                         help='[NOT IMPLEMENTED] ' +
@@ -72,15 +111,23 @@ if __name__ == '__main__':
                              'Use raw output, default is false',
                         action='store_true')
     parser.add_argument('--version', action='version',
-                        version=COLLECTOR_VERSION)
+                        version=VERSION)
 
     args = parser.parse_args()
+    if args.debug:
+        enable_debug()
+    sillyfacter.config.STRICT = args.strict
+    #
+    import sillyfacter.common
     #
     lg = sillyfacter.common.setup_logger(level=args.verbose,
                                          logfile=args.log)
     ldict = {"step": "main",
              "hostname": platform.node().split(".")[0]}
     l = logging.LoggerAdapter(sillyfacter.common.fetch_lg(), ldict)
+    l.info("Starting {} v{}".format(__file__, VERSION))
+    if sillyfacter.config.STRICT is True:
+        l.warning("Strict mode is enabled!!")
     #
     fetchable = {}
     modules = []
@@ -96,6 +143,8 @@ if __name__ == '__main__':
         modules = list(set(modules))
 
     #
+    retval = 0
+    #
     if args.out is None or \
             re.match('^[/a-z0-9].*\.json', args.out, re.IGNORECASE):
         outmodule = "json"
@@ -104,12 +153,12 @@ if __name__ == '__main__':
             l.info("Importing output filter '{}'".format(outmodule))
             outmodule = __import__("sillyfacter.output.{}".format(outmodule),
                                    fromlist=[outmodule])
-            output = getattr(outmodule, "output")(modules,
-                                                  args.out)
+            output, retval = getattr(outmodule, "output")(modules,
+                                                          args.out)
         except:
             raise
         else:
-            print("{}".format(output))
+            print(output)
     elif re.match('^mongodb\://.*', args.out):
         outmodule = "mongo"
         output = None
@@ -117,12 +166,14 @@ if __name__ == '__main__':
             l.info("Importing output filter '{}'".format(outmodule))
             outmodule = __import__("sillyfacter.output.{}".format(outmodule),
                                    fromlist=[outmodule])
-            output = getattr(outmodule, "output")(modules,
-                                                  args.out)
+            output, retval = getattr(outmodule, "output")(modules,
+                                                          args.out)
         except:
             raise
         else:
-            print("{}".format(output))
+            print(output)
     else:
         print("Invalid argument '{}' passed".format(args.out))
-    l.info("Bye bye")
+        retval = 1
+    l.info("exit code is {}".format(retval))
+    sys.exit(retval)

@@ -7,6 +7,7 @@ import re
 import logging
 import inspect
 from .common import *
+import sillyfacter.config
 
 
 MODULEFILE = re.sub('\.py', '',
@@ -30,7 +31,10 @@ def fetch():
             try:
                 disk_usage = psutil.disk_usage(p.mountpoint)
             except:
-                pass
+                if sillyfacter.config.STRICT:
+                    raise
+                if sillyfacter.config.DEBUG:
+                    l.exception("")
             else:
                 partition["total"] = disk_usage.total
                 partition["used"] = disk_usage.used

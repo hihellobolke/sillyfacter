@@ -22,30 +22,35 @@ def output(modules=[], out='mongodb://localhost/sillyfacter_db'):
     fetched, fetchable = fetchprocessor(modules)
     fetchobj = fetch2json(fetched, fetchable)
     fetchobj["_id"] = fetchobj["_scan_id"]
-    retval = {"status": "Save failed",
-              "url": out}
+    return_dict = {"status": "Save failed",
+                   "returncode": 1,
+                   "url": out}
     coll, db, conn = _collection(dburl=out)
+    retstr, returnval = None, None
     if coll is not None:
         try:
             docid = coll.save(fetchobj, safe=True)
-            retval["status"] = "Save success"
-            retval["_info"] = {}
-            retval["_info"]["_id"] = docid
-            retval["_info"]["collection"] = coll.name
-            retval["_info"]["db"] = db.name
-            retval["_info"]["host"] = conn.host
-            retval["_info"]["port"] = conn.port
+            return_dict["status"] = "Save success"
+            return_dict["_info"] = {}
+            return_dict["_info"]["_id"] = docid
+            return_dict["_info"]["collection"] = coll.name
+            return_dict["_info"]["db"] = db.name
+            return_dict["_info"]["host"] = conn.host
+            return_dict["_info"]["port"] = conn.port
         except Exception as ex:
             l.exception("Unable to save data in collection: {}".format(ex))
+            retval = 1
         else:
             l.info("Saved data with _id as '{}'".format(docid))
+            return_dict["returncode"] = 0
+            retval = 0
         finally:
             conn.close()
-    jsonstr = json.dumps(retval,
-                         sort_keys=True,
-                         indent=4,
-                         separators=(',', ': '))
-    return jsonstr
+    retstr = json.dumps(return_dict,
+                        sort_keys=True,
+                        indent=4,
+                        separators=(',', ': '))
+    return retstr, retval
 
 
 def _collection(dburl='mongodb://localhost/sillyfacter_db'):

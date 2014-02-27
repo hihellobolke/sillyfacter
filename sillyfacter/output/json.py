@@ -7,6 +7,7 @@ import platform
 import inspect
 import json
 import datetime
+import psutil
 from ..common import *
 
 MODULEFILE = re.sub('\.py', '',
@@ -29,19 +30,25 @@ def output(modules=[], out=None):
     #
     l.info("Gathering output...")
     fetched, fetchable = fetchprocessor(modules)
-    retval = None
+    retstr, retval = None, None
+    fetchraw = None
     try:
-        jsonstr = json.dumps(fetch2json(fetched,
-                                        fetchable),
+        fetchraw = fetch2json(fetched,
+                              fetchable)
+        jsonstr = json.dumps(fetchraw,
                              sort_keys=True,
                              indent=4,
                              cls=DateTimeEncoder,
                              separators=(',', ': '))
     except:
         l.exception("Unable to convert obj to JSON")
+        l.warning("RAW:\n{}".format(fetchraw))
+        retstr = ""
+        retval = 1
     else:
-        retval = jsonstr
-    return retval
+        retstr = jsonstr
+        retval = 0
+    return retstr, retval
 
 
 def lookup(f, t=None):
@@ -97,7 +104,8 @@ def fetch2json(f, fetchable):
     fetched["_scan_time"] = datetime.datetime.now()
     fetched["has"] = {}
     fetched["had"] = {}
-
+    dt = datetime.datetime.fromtimestamp
+    boottime = dt(psutil.get_boot_time())
     # host main
     if "os" in f:
         for item, val in f["os"].iteritems():
@@ -131,16 +139,16 @@ def fetch2json(f, fetchable):
                 newitem["exe_fs"] = f["process"][pid]["exe_fs"]
             newitem["user"] = f["process"][pid]["user"]
             newitem["createtime"] = f["process"][pid]["create_time"]
-            if fetched["boottime"] + datetime.timedelta(seconds=600) \
+            if boottime + datetime.timedelta(seconds=600) \
                     > newitem["createtime"]:
                 _process_type.add("startup-prog")
             else:
                 _process_type.add("user-prog")
             #
             # proc network conn
-            if "connections" in f["process"][pid]:
-                newitem["connections"] = []
-                newconns = f["process"][pid]["connections"]
+            if "connection" in f["process"][pid]:
+                newitem["connection"] = []
+                newconns = f["process"][pid]["connection"]
                 for conn in newconns:
                     conn_src = conn[0]
                     conn_src_ip = ":".join(conn_src.split(':')[:-1])
@@ -160,8 +168,10 @@ def fetch2json(f, fetchable):
                     conn_pair = {"source": conn_src_host + ":" + conn_src_port,
                                  "destination": conn_dst_host +
                                  ":" + conn_dst_port}
-                    newitem["connections"].append(conn_pair)
+                    newitem["connection"].append(conn_pair)
                     _process_type.add(_process_type_network)
+                if len(newitem["connection"]) == 0:
+                    del newitem["connection"]
             #
             # proc open mounts
             if "open" in f["process"][pid]:
@@ -175,7 +185,11 @@ def fetch2json(f, fetchable):
                         _, fstype = myfslookup(dev=fs)
                         if fstype is not None and len(fstype) > 0:
                             _process_type.add("{}-client".format(fstype))
-                newitem["open"]["filesystem"] = list(open_fs)
+                open_fs_list = list(open_fs)
+                if len(open_fs_list) > 0:
+                    newitem["open"]["filesystem"] = list(open_fs)
+                else:
+                    del newitem["open"]
             newitem["type"] = list(_process_type)
             fetched["has"]["process"].append(newitem)
     if "user" in f:
@@ -189,6 +203,7 @@ def fetch2json(f, fetchable):
         fetched_custom = {}
         for modulename, val in f["custom"].iteritems():
             try:
+                fetched_custom = None
                 m = fetchable["custom"][modulename]
                 if hasattr(m, "output_for_json"):
                     fetched_custom = getattr(m, "output_for_json")(val)
@@ -199,5 +214,7 @@ def fetch2json(f, fetchable):
                             "'{}'".format(m))
             except:
                 l.error("custom module {} not loaded".format(modulename))
-        fetched = dict(fetched, **fetched_custom)
+            else:
+                if fetched_custom is not None:
+                    fetched = dict(fetched, **fetched_custom)
     return fetched

@@ -8,7 +8,8 @@ import os
 import re
 import datetime
 from .common import *
-##
+import sillyfacter.config
+
 
 MODULEFILE = re.sub('\.py', '',
                             os.path.basename(inspect.stack()[0][1]))
@@ -46,7 +47,11 @@ def fetch():
         try:
             host_props_extra = fetch_linux()
         except Exception as _:
-            l.exception("unable to fetch linux specific info '{}'".format(_))
+            if sillyfacter.config.STRICT:
+                raise
+            if sillyfacter.config.DEBUG:
+                l.exception("")
+            l.error("unable to fetch linux specific info '{}'".format(_))
             host_props_extra = {}
         host_props = dict(host_props.items() + host_props_extra.items())
     for i in host_props:
