@@ -175,21 +175,24 @@ def fetch2json(f, fetchable):
             #
             # proc open mounts
             if "open" in f["process"][pid]:
-                newitem["open"] = {"filesystem": []}
+                newitem["open"] = []
+                newitem["fs"] = []
                 open_fs = set()
                 mountpairs = f["process"][pid]["open"]
                 for mountpair in mountpairs:
-                    if "fs" in mountpair:
+                    if "path" in mountpair and "fs" in mountpair:
                         fs = mountpair["fs"]
                         open_fs.add(fs)
                         _, fstype = myfslookup(dev=fs)
                         if fstype is not None and len(fstype) > 0:
                             _process_type.add("{}-client".format(fstype))
+                        fl = mountpair["path"]
+                        newitem["open"].append({"file": fl,
+                                                "filesystem": fs})
                 open_fs_list = list(open_fs)
                 if len(open_fs_list) > 0:
-                    newitem["open"]["filesystem"] = list(open_fs)
-                else:
-                    del newitem["open"]
+                    newitem["open_filesystem"] = open_fs_list
+
             newitem["type"] = list(_process_type)
             fetched["has"]["process"].append(newitem)
     if "user" in f:
