@@ -33,7 +33,7 @@ But these are taken care by **pip** during installation
 
 #### Using pip
 
-###### Upgrade pip to v1.5
+###### First Upgrade pip to v1.5
 
 ```
   # Needs pip v1.5
@@ -41,9 +41,15 @@ But these are taken care by **pip** during installation
   pip install --upgrade pip
 ```
 
-###### Pip install
+###### Then Pip install
 The netifaces module is a bit irritating... so have to use extra options.
 
+```
+  pip install --allow-all-external --allow-unverified netifaces sillyfacter
+  # --allow-all-external and --allow-unverified is needed for netifaces :-(
+
+```
+###### To upgrade to latest version
 ```
   pip install --upgrade --allow-all-external --allow-unverified netifaces sillyfacter
   # --upgrade ensures latest versions
@@ -59,6 +65,7 @@ On Debian
   - Download installer bash script and run it
     - ```wget https://raw.github.com/hihellobolke/sillyfacter/master/installer.bash```
     - ```bash installer.bash```
+
 
 ### Usage
 
