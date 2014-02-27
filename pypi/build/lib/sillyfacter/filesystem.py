@@ -7,6 +7,7 @@ import re
 import logging
 import inspect
 from .common import *
+import sillyfacter.config
 
 
 MODULEFILE = re.sub('\.py', '',
@@ -27,11 +28,18 @@ def fetch():
                      "mount": p.mountpoint,
                      "fstype": p.fstype}
         if (re.match('ext[0-9]|xfs|ufs|btrfs', p.fstype, re.IGNORECASE)):
-            disk_usage = psutil.disk_usage(p.mount)
-            partition["total"] = disk_usage.total
-            partition["used"] = disk_usage.used
-            partition["free"] = disk_usage.free
-            partition["percent"] = disk_usage.free
+            try:
+                disk_usage = psutil.disk_usage(p.mountpoint)
+            except:
+                if sillyfacter.config.STRICT:
+                    raise
+                if sillyfacter.config.DEBUG:
+                    l.exception("")
+            else:
+                partition["total"] = disk_usage.total
+                partition["used"] = disk_usage.used
+                partition["free"] = disk_usage.free
+                partition["percent"] = disk_usage.percent
         fs.append(partition)
     for p in psutil.disk_partitions(all=True):
         if (re.match('nfs|autofs', p.fstype, re.IGNORECASE)):

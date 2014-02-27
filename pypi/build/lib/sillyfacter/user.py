@@ -53,7 +53,7 @@ def last_users(last=20):
     if ostype == "SunOS":
         last_cmd = ["/bin/last", "-a"]
     elif ostype == "Linux":
-        last_cmd = ["/usr/bin/lastlog", "-t", "{}".format(last)]
+        last_cmd = ["/usr/bin/last", "-a"]
     else:
         last_cmd = ["/usr/bin/last"]
     last = Command(last_cmd)
@@ -68,47 +68,45 @@ def last_parser(lastout, last=20):
     dprint = debugprint(log_level=_log_level)
     last_users = []
     today = datetime.datetime.today()
-    re_solaris = '([0-9a-z]+)\s+' + \
-                 '.+' + \
-                 '(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+' + \
-                 '([a-z]{3})\s+' + \
-                 '([0-9]+)\s+' + \
-                 '([0-9][0-9]):([0-9][0-9]).*$'
-    re_solaris = re.compile(re_solaris, re.IGNORECASE)
-    ostype = os.uname()[0]
-    if ostype == "Linux":
-        last_users = [line.split()[0] for line in lastout[1:]]
-    else:
-        regx = re_solaris
-        for line in lastout:
-            dmsg = dprint()
-            line = str(line.strip())
-            dmsg += ["Input: '{}'".format(line)]
-            m = regx.match(line)
-            if m:
-                user = m.group(1).strip()
-                mm = m.group(3).strip()
-                dd = int(m.group(4).strip())
-                hour = m.group(5).strip()
-                mins = m.group(6).strip()
-                date_string = "{:02} {} {} {} {}".format(dd, mm, today.year,
+    re_last = '([0-9a-z]+)\s+' + \
+              '.+' + \
+              '(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+' + \
+              '([a-z]{3})\s+' + \
+              '([0-9]+)\s+' + \
+              '([0-9][0-9]):([0-9][0-9]).*$'
+    re_last = re.compile(re_last, re.IGNORECASE)
+    regx = re_last
+    for line in lastout:
+        dmsg = dprint()
+        line = str(line.strip())
+        dmsg += ["Input: '{}'".format(line)]
+        if re.search('still logged in', line):
+            continue
+        m = regx.match(line)
+        if m:
+            user = m.group(1).strip()
+            mm = m.group(3).strip()
+            dd = int(m.group(4).strip())
+            hour = m.group(5).strip()
+            mins = m.group(6).strip()
+            date_string = "{:02} {} {} {} {}".format(dd, mm, today.year,
+                                                     hour, mins)
+            date_format = "%d %b %Y %H %M"
+            parsed_date = datetime.datetime.strptime(date_string,
+                                                     date_format)
+            if parsed_date > today:
+                date_string = "{:02} {} {} {} {}".format(dd, mm,
+                                                         today.year - 1,
                                                          hour, mins)
-                date_format = "%d %b %Y %H %M"
                 parsed_date = datetime.datetime.strptime(date_string,
                                                          date_format)
-                if parsed_date > today:
-                    date_string = "{:02} {} {} {} {}".format(dd, mm,
-                                                             today.year - 1,
-                                                             hour, mins)
-                    parsed_date = datetime.datetime.strptime(date_string,
-                                                             date_format)
-                if parsed_date > (today - datetime.timedelta(days=20)):
-                    last_users.append(user)
-                dmsg.append("set: last_users.add({})".format(user))
+            if parsed_date > (today - datetime.timedelta(days=20)):
+                last_users.append(user)
+            dmsg.append("set: last_users.add({})".format(user))
 
-            else:
-                dmsg.append("match: Bad match")
-            dmsg = dprint(dmsg, "lastuser")
-            last_users = list(set(last_users))
+        else:
+            dmsg.append("match: Bad match")
+        dmsg = dprint(dmsg, "lastuser")
+        last_users = list(set(last_users))
     return last_users
     #

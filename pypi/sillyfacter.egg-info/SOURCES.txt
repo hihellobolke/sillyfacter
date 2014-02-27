@@ -20,8 +20,9 @@ sillyfacter.egg-info/entry_points.txt
 sillyfacter.egg-info/not-zip-safe
 sillyfacter.egg-info/requires.txt
 sillyfacter.egg-info/top_level.txt
+sillyfacter/config/__init__.py
 sillyfacter/custom/__init__.py
-sillyfacter/custom/eman.py
+sillyfacter/custom/ansible.py
 sillyfacter/output/__init__.py
 sillyfacter/output/json.py
 sillyfacter/output/mongo.py

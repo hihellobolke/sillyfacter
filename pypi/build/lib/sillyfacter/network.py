@@ -8,6 +8,7 @@ import netifaces
 import logging
 import inspect
 from .common import *
+import sillyfacter.config
 
 
 MODULEFILE = re.sub('\.py', '',
@@ -29,6 +30,10 @@ def fetch():
             sent = nwio[i].bytes_sent
             nw.append({"ip": ip, "recv": recv, "sent": sent, "ifname": i})
         except:
+            if sillyfacter.config.STRICT:
+                raise
+            if sillyfacter.config.DEBUG:
+                l.exception("")
             ip = None
             recv = nwio[i].bytes_recv
             sent = nwio[i].bytes_sent
